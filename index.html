@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Three.js Image Animation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+<link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<canvas id="webgl" class="webgl"></canvas>
+
+<div class="container">
+  <h1>塞尔达传说：旷野之息</h1>
+  <ul class="list">
+    <li class="item">
+      <div class="box">
+        <div class="title">起源</div>
+        <p class="text">海拉鲁王国的历史是一部从远古时代开始，便接连蒙受盖侬这一灾厄入侵的历史。灾厄盖侬是太古时代，在海拉鲁诞生的魔王，他化为怨念的姿态，每隔一段时间便会复活。每到那时，拥有勇者之魂的人就会和继承了女神之血的神圣公主一起为海拉鲁夺回和平。</p>
+      </div>
+      <a href="#" class="wrap">
+        <img class="wrap_img" src="./images/1.jpg">
+      </a>
+    </li>
+    <li class="item">
+      <div class="box">
+        <div class="title">守护</div>
+        <p class="text">远古祖先曾制造能被人类所操控、具有野兽外表的四座巨大神兽和具有自我意识与敌人战斗的傀儡——守护者。持有封印之力的王室公主和被驱魔之剑选中的骑士，他们曾在遥远的太古时代，与神兽和防卫者们一同封印盖侬。</p>
+      </div>
+      <a href="#" class="wrap">
+        <img class="wrap_img" src="./images/2.jpg">
+      </a>
+    </li>
+    <li class="item">
+      <div class="box">
+        <div class="title">毁灭</div>
+        <p class="text">然而一百年前的某一天，海拉鲁王国的占卜师留下了一个预言说：“给大地带来灾厄的盖侬有了开始复活的前兆，可是反抗盖侬的力量仍沉眠于大地。”海拉鲁王国的人民也模仿祖先出阵对抗。从海拉鲁选出具有优秀能力的四个人，交由他们操控神兽，并找到被驱魔之剑选中的骑士林克。接着推选公主塞尔达为领导者，其余五人为英杰，巩固力量。在公主和五英杰齐聚一堂之下，原本应该能封印灾厄才对，但是狡猾的盖侬却从海拉尔城堡的地下深处复活，控制了防卫者和四神兽并袭击回来。城镇居民和操控神兽的英杰丧命，林克也为了保护公主而伤重倒下，海拉鲁王国被盖侬毁灭了。</p>
+      </div>
+      <a href="#" class="wrap">
+        <img class="wrap_img" src="./images/3.jpg">
+      </a>
+    </li>
+
+    <li class="item">
+      <div class="box">
+        <div class="title">封印</div>
+        <p class="text">但是，幸存下来的公主，在最后时刻释放了封印之力，将被选中的骑士林克送出了城堡，只剩自己挺身对抗着盖侬，由于公主一人的力量不足以消灭盖侬，最后不得不将自己与盖侬一同限制在城堡中。</p>
+      </div>
+      <a href="#" class="wrap">
+        <img class="wrap_img" src="./images/4.jpg">
+      </a>
+    </li>
+
+    <li class="item">
+      <div class="box">
+        <div class="title">使命</div>
+        <p class="text"> 该作故事发生在海拉鲁王国灭亡的一百年后，玩家扮演的林克在地下遗迹苏醒，但却失去了一切记忆，耳边时而响起既熟悉又陌生的声音，指引着林克开始了新的冒险之旅。林克只得在冒险中重拾记忆并最终去完成属于自己一百年前的使命。</p>
+      </div>
+      <a href="#" class="wrap">
+        <img class="wrap_img" src="./images/5.jpg">
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+<script id="f-shader" type="x-shader/x-fragment">
+  
+    varying vec2 vUv;
+    uniform sampler2D uTexture;
+    uniform float uImageAspect;
+    uniform float uPlaneAspect;
+    uniform float uTime;
+
+    void main(){
+        // 将图像方面与平面对象方面进行比较，使其更短
+        vec2 ratio = vec2(
+            min(uPlaneAspect / uImageAspect, 1.0),
+            min((1.0 / uPlaneAspect) / (1.0 / uImageAspect), 1.0)
+        );
+
+        // 使用计算结果居中纹理
+        vec2 fixedUv = vec2(
+            (vUv.x - 0.5) * ratio.x + 0.5,
+            (vUv.y - 0.5) * ratio.y + 0.5
+        );
+
+        vec2 offset = vec2(0.0, uTime * 0.0005);
+        float r = texture2D(uTexture, fixedUv + offset).r;
+        float g = texture2D(uTexture, fixedUv + offset * 0.5).g;
+        float b = texture2D(uTexture, fixedUv).b;
+        vec3 texture = vec3(r, g, b);
+
+        gl_FragColor = vec4(texture, 1.0);
+    }
+  
+</script>
+
+<script id="v-shader" type="x-shader/x-vertex">
+  
+    varying vec2 vUv;
+    uniform float uTime;
+
+    float PI = 3.1415926535897932384626433832795;
+
+    void main(){
+        vUv = uv;
+        vec3 pos = position;
+
+        // 横向
+        float amp = 0.01; // 值越大振幅越大
+        float freq = 0.01 * uTime; // 值越小频率越高
+
+        // 纵向
+        float tension = -0.001 * uTime; // 上下张力
+
+        pos.x = pos.x + sin(pos.y * PI  * freq) * amp;
+        pos.y = pos.y + (cos(pos.x * PI) * tension);
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    }
+  
+</script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js'></script><script  src="./script.js"></script>
+
+</body>
+</html>
